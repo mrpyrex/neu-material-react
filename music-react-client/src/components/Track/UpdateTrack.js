@@ -3,7 +3,7 @@ import React from "react";
 const UpdateTrack = () => {
   return (
     <div>
-      <i className="fas fa-user"></i>
+      <button>UpdateTrack</button>
     </div>
   );
 };
