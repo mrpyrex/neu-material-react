@@ -13,12 +13,23 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import MusicNoteIcon from "@material-ui/icons/MusicNote";
-import { FormControl, Button, TextField } from "@material-ui/core";
+import {
+  FormControl,
+  Button,
+  TextField,
+  FormHelperText
+} from "@material-ui/core";
+import CircularProgress from "@material-ui/core/CircularProgress";
+
 import Error from "../Shared/Error";
+import { GET_TRACKS_QUERY } from "../../pages/App";
 
 const useStyles = makeStyles(theme => ({
   fab: {
     margin: theme.spacing(1)
+  },
+  progress: {
+    margin: theme.spacing(2)
   },
   extendedIcon: {
     marginRight: theme.spacing(1)
@@ -31,10 +42,17 @@ export default function CreateTrack() {
   const [description, setDescription] = useState("");
   const [file, setFile] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [fileError, setFileError] = useState("");
 
   const handleAudio = event => {
     const selectedFile = event.target.files[0];
-    setFile(selectedFile);
+    const fileSizeLimit = 4000000; // 4mb
+    if (selectedFile && selectedFile.size > fileSizeLimit) {
+      setFileError(`${selectedFile.name}: is larger than 4mb`);
+    } else {
+      setFile(selectedFile);
+      setFileError("");
+    }
   };
 
   const handleAudioUpload = async () => {
@@ -46,7 +64,7 @@ export default function CreateTrack() {
       data.append("cloud_name", "neupytech");
 
       const res = await axios.post(
-        "https://api.cloudinary.com/v1_1/neupytech/raw/upload",
+        "https://api.cloudinary.com/v1_1/neupytech/raw/upload/",
         data
       );
       return res.data.url;
@@ -60,7 +78,7 @@ export default function CreateTrack() {
     event.preventDefault();
     setSubmitting(true);
     const uploadUrl = await handleAudioUpload();
-    createTrack({ title, description, url: uploadUrl });
+    createTrack({ variables: { title, description, url: uploadUrl } });
   };
 
   const classes = useStyles();
@@ -80,7 +98,11 @@ export default function CreateTrack() {
         onCompleted={data => {
           setSubmitting(false);
           setOpen(false);
+          setTitle("");
+          setDescription("");
+          setFile("");
         }}
+        refetchQueries={() => [{ query: GET_TRACKS_QUERY }]}
       >
         {(createTrack, { loading, error }) => {
           if (error) return <Error error={error} />;
@@ -98,6 +120,7 @@ export default function CreateTrack() {
                         onChange={event => setTitle(event.target.value)}
                         label="Title"
                         placeholder="Add Title"
+                        value={title}
                       />
                     </FormControl>
                   </div>
@@ -109,11 +132,12 @@ export default function CreateTrack() {
                         rows="2"
                         label="Description"
                         placeholder="Add Description"
+                        value={description}
                       />
                     </FormControl>
                   </div>
                   <div>
-                    <FormControl>
+                    <FormControl error={Boolean(fileError)}>
                       <input
                         accept="audio/mp3, audio/wav"
                         id="audio"
@@ -128,6 +152,7 @@ export default function CreateTrack() {
                           <MusicNoteIcon />
                         </Button>
                         {file && file.name}
+                        <FormHelperText>{fileError}</FormHelperText>
                       </label>
                     </FormControl>
                   </div>
@@ -149,7 +174,14 @@ export default function CreateTrack() {
                     }
                     type="submit"
                   >
-                    Add Track
+                    {submitting ? (
+                      <CircularProgress
+                        className={classes.progress}
+                        size={20}
+                      />
+                    ) : (
+                      "Add Track"
+                    )}
                   </Button>
                 </DialogActions>
               </form>
