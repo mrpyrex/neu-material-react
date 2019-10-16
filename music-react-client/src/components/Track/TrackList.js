@@ -15,9 +15,11 @@ import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
+import Card from "@material-ui/core/Card";
 
 const useStyles = makeStyles(theme => ({
   card: {
+    minWidth: 275,
     display: "flex"
   },
   details: {
@@ -52,7 +54,7 @@ const TrackList = ({ tracks }) => {
           <ExpansionPanel key={track.id}>
             <ExpansionPanelSummary expandIcon={<MoreVertIcon />}>
               <ListItem>
-                <LikeTrack />
+                <LikeTrack trackId={track.id} likeCount={track.likes.length} />
                 <ListItemText
                   primary={track.title}
                   secondary={
@@ -65,8 +67,8 @@ const TrackList = ({ tracks }) => {
               </ListItem>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails>
-              <DeleteTrack />
-              <UpdateTrack />
+              <DeleteTrack track={track} />
+              <UpdateTrack track={track} />
             </ExpansionPanelDetails>
           </ExpansionPanel>
         ))}

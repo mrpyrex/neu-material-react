@@ -1,23 +1,29 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 import { gql } from "apollo-boost";
 import { Query } from "react-apollo";
 import SearchTracks from "../components/Track/SearchTracks";
 import TrackList from "../components/Track/TrackList";
-import CreateTrack from "../components/Track/CreateTrack";
 import Error from "../components/Shared/Error";
 import Loading from "../components/Shared/Loading";
+import Container from "@material-ui/core/Container";
 
 const App = () => {
+  const [searchResults, setSearchResults] = useState([]);
   return (
     <Fragment>
-      <SearchTracks />
-      <Query query={GET_TRACKS_QUERY}>
-        {({ data, loading, error }) => {
-          if (loading) return <Loading />;
-          if (error) return <Error />;
-          return <TrackList tracks={data.tracks} />;
-        }}
-      </Query>
+      <Container>
+        <SearchTracks setSearchResults={setSearchResults} />
+        <Query query={GET_TRACKS_QUERY}>
+          {({ data, loading, error }) => {
+            if (loading) return <Loading />;
+            if (error) return <Error />;
+
+            const tracks =
+              searchResults.length > 0 ? searchResults : data.tracks;
+            return <TrackList tracks={tracks} />;
+          }}
+        </Query>
+      </Container>
     </Fragment>
   );
 };

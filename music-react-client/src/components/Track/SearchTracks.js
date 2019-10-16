@@ -1,19 +1,20 @@
-import React from "react";
+import React, { useState, useRef } from "react";
+import { ApolloConsumer } from "react-apollo";
+import { gql } from "apollo-boost";
+
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
-import InputBase from "@material-ui/core/InputBase";
-import Divider from "@material-ui/core/Divider";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
+import ClearAllIcon from "@material-ui/icons/ClearAll";
 import SearchIcon from "@material-ui/icons/Search";
-import DirectionsIcon from "@material-ui/icons/Directions";
+import { FormControl, TextField } from "@material-ui/core";
 
 const useStyles = makeStyles(theme => ({
   root: {
     padding: "2px 4px",
     display: "flex",
-    alignItems: "center",
-    width: 400
+    alignItems: "center"
   },
   input: {
     marginLeft: theme.spacing(1),
@@ -28,28 +29,83 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function SearchTracks() {
+const SearchTracks = ({ setSearchResults }) => {
   const classes = useStyles();
 
-  return (
-    <Paper className={classes.root}>
-      <IconButton className={classes.iconButton} aria-label="menu">
-        <MenuIcon />
-      </IconButton>
-      <InputBase
-        className={classes.input}
-        placeholder="Search Tracks"
-        inputProps={{ "aria-label": "search tracks" }}
-      />
-      <IconButton className={classes.iconButton} aria-label="search">
-        <SearchIcon />
-      </IconButton>
+  const [search, setSearch] = useState("");
+  const inputEl = useRef();
 
-      <IconButton
-        color="primary"
-        className={classes.iconButton}
-        aria-label="directions"
-      ></IconButton>
-    </Paper>
+  const clearSearchInput = () => {
+    setSearchResults([]);
+    setSearch("");
+    inputEl.current.focus();
+  };
+
+  const handleSubmit = async (event, client) => {
+    event.preventDefault();
+    const res = await client.query({
+      query: SEARCH_TRACKS_QUERY,
+      variables: { search }
+    });
+    setSearchResults(res.data.tracks);
+    console.log(res.data.tracks);
+  };
+
+  return (
+    <ApolloConsumer>
+      {client => (
+        <form onSubmit={event => handleSubmit(event, client)}>
+          <Paper className={classes.root}>
+            <IconButton
+              onClick={clearSearchInput}
+              className={classes.iconButton}
+              aria-label="menu"
+            >
+              <ClearAllIcon />
+            </IconButton>
+            <TextField
+              fullWidth
+              className={classes.input}
+              placeholder="Search Tracks"
+              inputProps={{
+                "aria-label": "search tracks"
+              }}
+              onChange={event => setSearch(event.target.value)}
+              value={search}
+              inputRef={inputEl}
+            />
+
+            <IconButton className={classes.iconButton} aria-label="search">
+              <SearchIcon type="submit" />
+            </IconButton>
+
+            <IconButton
+              color="primary"
+              className={classes.iconButton}
+              aria-label="directions"
+            ></IconButton>
+          </Paper>
+        </form>
+      )}
+    </ApolloConsumer>
   );
-}
+};
+export default SearchTracks;
+
+const SEARCH_TRACKS_QUERY = gql`
+  query($search: String) {
+    tracks(search: $search) {
+      id
+      title
+      description
+      url
+      likes {
+        id
+      }
+      author {
+        id
+        username
+      }
+    }
+  }
+`;

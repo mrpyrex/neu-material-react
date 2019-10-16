@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import withRoot from "./withRoot";
 import { Query } from "react-apollo";
@@ -7,8 +7,10 @@ import Profile from "./pages/Profile";
 import App from "./pages/App";
 import Header from "./components/Shared/Header";
 
+export const UserContext = React.createContext();
+
 const Root = () => (
-  <Query query={ME_QUERY}>
+  <Query query={ME_QUERY} fetchPolicy="cache-and-network">
     {({ data, loading, error }) => {
       if (loading) return <div>Loading</div>;
       if (error) return <div>Error</div>;
@@ -16,13 +18,13 @@ const Root = () => (
       const currentUser = data.me;
       return (
         <Router>
-          <Fragment>
+          <UserContext.Provider value={currentUser}>
             <Header currentUser={currentUser} />
             <Switch>
               <Route exact path="/" component={App} />
               <Route path="/profile/:id" component={Profile} />
             </Switch>
-          </Fragment>
+          </UserContext.Provider>
         </Router>
       );
     }}
@@ -40,11 +42,17 @@ const Root = () => (
 //   }
 // `;
 
-const ME_QUERY = gql`
+export const ME_QUERY = gql`
   {
     me {
       id
       username
+      email
+      likeSet {
+        track {
+          id
+        }
+      }
     }
   }
 `;

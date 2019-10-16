@@ -1,12 +1,50 @@
-import React from "react";
+import React, { useContext } from "react";
+import { GET_TRACKS_QUERY } from "../../pages/App";
+import { Mutation } from "react-apollo";
+import { gql } from "apollo-boost";
+import DeleteSweepIcon from "@material-ui/icons/DeleteSweep";
+import { UserContext } from "../../Root";
+import { IconButton } from "@material-ui/core";
 
-const DeleteTrack = () => {
+const DeleteTrack = ({ track }) => {
+  const currentUser = useContext(UserContext);
+  const isCurrentuser = currentUser.id === track.author.id;
+  const handleUpdateCache = (cache, { data: { deleteTrack } }) => {
+    const data = cache.readQuery({ query: GET_TRACKS_QUERY });
+    const index = data.tracks.findIndex(
+      track => Number(track.id) === deleteTrack.trackId
+    );
+    // data.tracks.splice(index, 1)
+    const tracks = [
+      ...data.tracks.slice(0, index),
+      ...data.tracks.slice(index + 1)
+    ];
+    cache.writeQuery({ query: GET_TRACKS_QUERY, data: { tracks } });
+  };
   return (
-    <div className="container">
-      <button className="btn">Delete this Track</button>
-      <i className="fas fa-user"></i>
-    </div>
+    isCurrentuser && (
+      <Mutation
+        mutation={DELETE_TRACK_MUTATION}
+        variables={{ trackId: track.id }}
+        update={handleUpdateCache}
+        // refetchQueries={() => [{ query: GET_TRACKS_QUERY }]}
+      >
+        {deleteTrack => (
+          <IconButton onClick={deleteTrack}>
+            <DeleteSweepIcon />
+          </IconButton>
+        )}
+      </Mutation>
+    )
   );
 };
 
 export default DeleteTrack;
+
+const DELETE_TRACK_MUTATION = gql`
+  mutation($trackId: Int!) {
+    deleteTrack(trackId: $trackId) {
+      trackId
+    }
+  }
+`;

@@ -46,7 +46,7 @@ export default function CreateTrack() {
 
   const handleAudio = event => {
     const selectedFile = event.target.files[0];
-    const fileSizeLimit = 4000000; // 4mb
+    const fileSizeLimit = 10000000; // 4mb
     if (selectedFile && selectedFile.size > fileSizeLimit) {
       setFileError(`${selectedFile.name}: is larger than 4mb`);
     } else {
@@ -81,6 +81,12 @@ export default function CreateTrack() {
     createTrack({ variables: { title, description, url: uploadUrl } });
   };
 
+  const handleUpdateCache = (cache, { data: { createTrack } }) => {
+    const data = cache.readQuery({ query: GET_TRACKS_QUERY });
+    const tracks = data.tracks.concat(createTrack.track);
+    cache.writeQuery({ query: GET_TRACKS_QUERY, data: { tracks } });
+  };
+
   const classes = useStyles();
   return (
     <Fragment>
@@ -102,7 +108,8 @@ export default function CreateTrack() {
           setDescription("");
           setFile("");
         }}
-        refetchQueries={() => [{ query: GET_TRACKS_QUERY }]}
+        update={handleUpdateCache}
+        // refetchQueries={() => [{ query: GET_TRACKS_QUERY }]}
       >
         {(createTrack, { loading, error }) => {
           if (error) return <Error error={error} />;
@@ -201,6 +208,13 @@ const CREATE_TRACK_MUTATION = gql`
         title
         description
         url
+        likes {
+          id
+        }
+        author {
+          id
+          username
+        }
       }
     }
   }
