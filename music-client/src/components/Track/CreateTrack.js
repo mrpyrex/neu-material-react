@@ -26,7 +26,9 @@ import { GET_TRACKS_QUERY } from "../../pages/App";
 
 const useStyles = makeStyles(theme => ({
   fab: {
-    margin: theme.spacing(1)
+    position: "absolute",
+    bottom: theme.spacing(2),
+    right: theme.spacing(2)
   },
   progress: {
     margin: theme.spacing(2)

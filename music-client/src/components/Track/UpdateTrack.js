@@ -20,6 +20,7 @@ import {
   TextField,
   FormHelperText
 } from "@material-ui/core";
+import Fab from "@material-ui/core/Fab";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
 import Error from "../Shared/Error";
@@ -27,9 +28,6 @@ import Error from "../Shared/Error";
 const useStyles = makeStyles(theme => ({
   fab: {
     margin: theme.spacing(1)
-  },
-  progress: {
-    margin: theme.spacing(2)
   },
   extendedIcon: {
     marginRight: theme.spacing(1)
@@ -92,7 +90,9 @@ const UpdateTrack = ({ track }) => {
     isCurrentuser && (
       <Fragment>
         <IconButton onClick={() => setOpen(true)}>
-          <EditIcon />
+          <Fab color="secondary" aria-label="edit" className={classes.fab}>
+            <EditIcon />
+          </Fab>
         </IconButton>
 
         <Mutation

@@ -1,5 +1,7 @@
 import React from "react";
 import { ApolloConsumer } from "react-apollo";
+import IconButton from "@material-ui/core/IconButton";
+import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 
 const Signout = () => {
   const handleSignout = client => {
@@ -10,12 +12,12 @@ const Signout = () => {
   return (
     <ApolloConsumer>
       {client => (
-        <button
+        <IconButton
           onClick={() => handleSignout(client)}
           className="waves-effect waves-light btn "
         >
-          Signout
-        </button>
+          <ExitToAppIcon />
+        </IconButton>
       )}
     </ApolloConsumer>
   );

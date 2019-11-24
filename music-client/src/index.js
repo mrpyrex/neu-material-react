@@ -1,13 +1,17 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import Root from "./Root";
-import * as serviceWorker from "./serviceWorker";
 import { ApolloProvider, Query } from "react-apollo";
 import ApolloClient, { gql } from "apollo-boost";
+import Root from "./Root";
 import Auth from "./components/Auth";
+import * as serviceWorker from "./serviceWorker";
 
 const client = new ApolloClient({
   uri: "http://localhost:8000/graphql/",
+
+  fetchOptions: {
+    credentials: "include"
+  },
 
   request: operation => {
     const token = localStorage.getItem("authToken") || "";
@@ -17,7 +21,6 @@ const client = new ApolloClient({
       }
     });
   },
-
   clientState: {
     defaults: {
       isLoggedIn: !!localStorage.getItem("authToken")

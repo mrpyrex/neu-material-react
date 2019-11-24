@@ -1,18 +1,18 @@
 import React from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import withRoot from "./withRoot";
 import { Query } from "react-apollo";
 import { gql } from "apollo-boost";
-import Profile from "./pages/Profile";
+
 import App from "./pages/App";
+import Profile from "./pages/Profile";
+import Loading from "./components/Shared/Loading";
 import Header from "./components/Shared/Header";
 
 export const UserContext = React.createContext();
-
 const Root = () => (
-  <Query query={ME_QUERY} fetchPolicy="cache-and-network">
+  <Query query={ME_QUERY}>
     {({ data, loading, error }) => {
-      if (loading) return <div>Loading</div>;
+      if (loading) return <Loading />;
       if (error) return <div>Error</div>;
 
       const currentUser = data.me;
@@ -20,6 +20,7 @@ const Root = () => (
         <Router>
           <UserContext.Provider value={currentUser}>
             <Header currentUser={currentUser} />
+
             <Switch>
               <Route exact path="/" component={App} />
               <Route path="/profile/:id" component={Profile} />
@@ -56,5 +57,4 @@ export const ME_QUERY = gql`
     }
   }
 `;
-
-export default withRoot(Root);
+export default Root;
